@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	maxBase            = 999
-	maxActivationValue = 995
-	paygDisableValue   = 998
-	counterSyncValue   = 999
-	tokenValueOffset   = 1000
+	MaxBase            = 999
+	MaxActivationValue = 995
+	PaygDisableValue   = 998
+	CounterSyncValue   = 999
+	TokenValueOffset   = 1000
 )
 
 type tokenType uint8
@@ -29,11 +29,11 @@ const (
 )
 
 func getTokenBase(code uint64) uint64 {
-	return code % tokenValueOffset
+	return code % TokenValueOffset
 }
 
 func putBaseInToken(token, tokenbase uint64) (uint64, error) {
-	if tokenbase > maxBase {
+	if tokenbase > MaxBase {
 		return 0, fmt.Errorf("invalid value")
 	}
 
@@ -61,29 +61,13 @@ func convertHashToToken(hash uint64) uint32 {
 	binHash := make([]byte, 8)
 	binary.LittleEndian.PutUint64(binHash, hash)
 
-	// hiHashBits := make([]byte, 4)
-	// binary.LittleEndian.PutUint32(hiHashBits, uint32(binHash[0:4][0]))
-	// hiHash := binary.LittleEndian.Uint32(hiHashBits)
 	hiHash := binary.LittleEndian.Uint32(binHash[0:4])
-
-	// loHashBits := make([]byte, 4)
-	// binary.LittleEndian.PutUint32(loHashBits, uint32(binHash[4:8][0]))
-	// loHash := binary.LittleEndian.Uint32(loHashBits)
 	loHash := binary.LittleEndian.Uint32(binHash[4:8])
 
 	return convertTo29BitsAndHalf(uint64((hiHash ^ loHash)))
 }
 
 func loadSecretKeyFromHex(hexKey string) ([]byte, error) {
-	// secretKey := make([]byte, len(hexKey))
-	// _, err := hex.Decode([]byte(hexKey), secretKey)
-	// if err != nil {
-	// return nil, fmt.Errorf(
-	// "the secret key provided is not correctly formatted, it should be 32 hexadecimal characters: %w", err)
-	// }
-
-	// return secretKey, nil
-
 	secretKey, err := hex.DecodeString(hexKey)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -94,7 +78,7 @@ func loadSecretKeyFromHex(hexKey string) ([]byte, error) {
 
 }
 
-func generateStartingCde(key []byte) uint32 {
+func GenerateStartingCode(key []byte) uint32 {
 	startingHash := generateHash(key, key)
 
 	return convertHashToToken(startingHash)
