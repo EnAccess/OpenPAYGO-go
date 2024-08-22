@@ -10,7 +10,7 @@ on:
 
 jobs:
   tests:
-    name: Run Tests
+    name: Run Tests (token)
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,13 @@ jobs:
           go-version: 1.22.x
 
       - name: Install dependencies
+        working-directory: token
         run: go get .
 
       - name: Build
+        working-directory: token
         run: go build -v ./...
 
       - name: Run Tests
+        working-directory: token
         run: go test
