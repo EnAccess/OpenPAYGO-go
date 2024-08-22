@@ -100,12 +100,6 @@ func ConvertTo4DigitsToken(source uint64) string {
 
 	bitArray := getBitArrayFromInt(source, 4*2)
 
-	//for i := range 4 {
-	//	thisArray := bitArray[i*2 : (i*2)+2]
-	//	restrictedDigitToken.WriteString(
-	//		fmt.Sprint(bitArrayToInt(thisArray) + 1))
-	//}
-
 	ir := bitArrayToInt(bitArray)
 
 	restrictedDigitToken.WriteString(fmt.Sprintf("%d", ir))
