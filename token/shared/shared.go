@@ -17,33 +17,33 @@ const (
 	TokenValueOffset   = 1000
 )
 
-type tokenType uint8
+type TokenType uint8
 
 const (
-	tokenTypeAddTime     tokenType = 1
-	tokenTypeSetTime               = 2
-	tokenTypeDisablePayg           = 3
-	tokenTypeCounterSync           = 4
-	tokenTypeInvalid               = 10
-	tokenTypeAlreadyUsed           = 11
+	TokenTypeAddTime     TokenType = 1
+	TokenTypeSetTime               = 2
+	TokenTypeDisablePayg           = 3
+	TokenTypeCounterSync           = 4
+	TokenTypeInvalid               = 10
+	TokenTypeAlreadyUsed           = 11
 )
 
-func getTokenBase(code uint64) uint64 {
+func GetTokenBase(code uint64) uint64 {
 	return code % TokenValueOffset
 }
 
-func putBaseInToken(token, tokenbase uint64) (uint64, error) {
+func PutBaseInToken(token, tokenbase uint64) (uint64, error) {
 	if tokenbase > MaxBase {
 		return 0, fmt.Errorf("invalid value")
 	}
 
-	return token - getTokenBase(token) + tokenbase, nil
+	return token - GetTokenBase(token) + tokenbase, nil
 }
 
-func generateNextToken(lastCode uint32, key []byte) uint32 {
+func GenerateNextToken(lastCode uint32, key []byte) uint32 {
 	conformedToken := make([]byte, 4)
 
-	binary.LittleEndian.PutUint32(conformedToken, lastCode)
+	binary.BigEndian.PutUint32(conformedToken, lastCode)
 
 	extendedToken := append(conformedToken, conformedToken...)
 
@@ -59,12 +59,12 @@ func generateHash(key []byte, token []byte) uint64 {
 
 func convertHashToToken(hash uint64) uint32 {
 	binHash := make([]byte, 8)
-	binary.LittleEndian.PutUint64(binHash, hash)
+	binary.BigEndian.PutUint64(binHash, hash)
 
-	hiHash := binary.LittleEndian.Uint32(binHash[0:4])
-	loHash := binary.LittleEndian.Uint32(binHash[4:8])
+	hiHash := binary.BigEndian.Uint32(binHash[0:4])
+	loHash := binary.BigEndian.Uint32(binHash[4:8])
 
-	return convertTo29BitsAndHalf(uint64((hiHash ^ loHash)))
+	return convertTo29BitsAndHalf(uint64(hiHash ^ loHash))
 }
 
 func loadSecretKeyFromHex(hexKey string) ([]byte, error) {
@@ -87,7 +87,6 @@ func GenerateStartingCode(key []byte) uint32 {
 func convertTo29BitsAndHalf(source uint64) uint32 {
 	//TODO: check this mask value
 	mask := ((uint64(1) << (32 - 2 + 1)) - 1) << 2
-
 	temp := (source & mask) >> 2
 	if temp > 999999999 {
 		temp = temp - 73741825
@@ -96,12 +95,12 @@ func convertTo29BitsAndHalf(source uint64) uint32 {
 	return uint32(temp)
 }
 
-func convertTo4DigitsToken(source uint64) string {
+func ConvertTo4DigitsToken(source uint64, nbOfDigits int) string {
 	var restrictedDigitToken strings.Builder
 
-	bitArray := getBitArrayFromInt(source, 30)
+	bitArray := getBitArrayFromInt(source, nbOfDigits*2)
 
-	for i := range 15 {
+	for i := range nbOfDigits {
 		thisArray := bitArray[i*2 : (i*2)+2]
 		restrictedDigitToken.WriteString(
 			fmt.Sprint(bitArrayToInt(thisArray) + 1))
@@ -119,16 +118,27 @@ func convertFrom4DigitsToken(digits string) uint64 {
 		bits = append(bits, tmp...)
 	}
 
-	return bitArrayToInt(bits)
+	return uint64(bitArrayToInt(bits))
 }
 
 func getBitArrayFromInt(source uint64, nbOfBits int) []byte {
-	bitsArray := make([]byte, (nbOfBits/8)+1)
-	binary.LittleEndian.PutUint64(bitsArray, source)
+
+	bitsArray := make([]byte, nbOfBits)
+	for i := 0; i < nbOfBits; i++ {
+		if (source & (1 << (nbOfBits - 1 - i))) != 0 {
+			bitsArray[i] = 1
+		} else {
+			bitsArray[i] = 0
+		}
+	}
 
 	return bitsArray
 }
 
-func bitArrayToInt(bits []byte) uint64 {
-	return binary.LittleEndian.Uint64(bits)
+func bitArrayToInt(bits []byte) int {
+	num := 0
+	for _, bit := range bits {
+		num = (num << 1) | int(bit)
+	}
+	return num
 }

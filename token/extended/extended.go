@@ -10,19 +10,19 @@ import (
 )
 
 const (
-	maxBase            = 999999
-	maxActivationValue = 999999
-	tokenValueOffset   = 1000000
+	MaxBase            = 999999
+	MaxActivationValue = 999999
+	TokenValueOffset   = 1000000
 )
 
-type tokenType uint8
+type TokenType uint8
 
 func getTokenBase(code uint64) uint64 {
-	return code % tokenValueOffset
+	return code % TokenValueOffset
 }
 
 func putBaseInToken(token, tokenbase uint64) (uint64, error) {
-	if tokenbase > maxBase {
+	if tokenbase > MaxBase {
 		return 0, fmt.Errorf("invalid value")
 	}
 
@@ -32,7 +32,7 @@ func putBaseInToken(token, tokenbase uint64) (uint64, error) {
 func generateNextToken(lastCode uint64, key []byte) uint32 {
 	conformedToken := make([]byte, 8)
 
-	binary.LittleEndian.PutUint64(conformedToken, lastCode)
+	binary.BigEndian.PutUint64(conformedToken, lastCode)
 
 	return convertHashToToken(generateHash(key, conformedToken))
 }
@@ -106,11 +106,11 @@ func convertFrom4DigitsToken(digits string) uint64 {
 
 func getBitArrayFromInt(source uint64, nbOfBits int) []byte {
 	bitsArray := make([]byte, (nbOfBits/8)+1)
-	binary.LittleEndian.PutUint64(bitsArray, source)
+	binary.BigEndian.PutUint64(bitsArray, source)
 
 	return bitsArray
 }
 
 func bitArrayToInt(bits []byte) uint64 {
-	return binary.LittleEndian.Uint64(bits)
+	return binary.BigEndian.Uint64(bits)
 }
