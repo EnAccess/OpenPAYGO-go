@@ -55,10 +55,11 @@ Not all libraries have implemented the full range of features yet.
 
 The **OpenPAYGO Go library** supports the following features:
 
-| Feature           | Status               |
-| ----------------- | -------------------- |
-| OpenPAYGO Token   | ✅ (beta)            |
-| OpenPAYGO Metrics | ❌ (not implemented) |
+| Feature                    | Status               |
+| -------------------------- | -------------------- |
+| OpenPAYGO Token (normal)   | ✅                   |
+| OPenPAYGO Token (extended) | ❌ (not implemented) |
+| OpenPAYGO Metrics          | ❌ (not implemented) |
 
 ## Support
 
