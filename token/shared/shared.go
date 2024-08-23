@@ -95,14 +95,16 @@ func convertTo29BitsAndHalf(source uint64) uint32 {
 	return uint32(temp)
 }
 
-func ConvertTo4DigitsToken(source uint64) string {
+func ConvertTo4DigitsToken(source uint64, nbOfDigits int) string {
 	var restrictedDigitToken strings.Builder
 
-	bitArray := getBitArrayFromInt(source, 4*2)
+	bitArray := getBitArrayFromInt(source, nbOfDigits*2)
 
-	ir := bitArrayToInt(bitArray)
-
-	restrictedDigitToken.WriteString(fmt.Sprintf("%d", ir))
+	for i := range nbOfDigits {
+		thisArray := bitArray[i*2 : (i*2)+2]
+		restrictedDigitToken.WriteString(
+			fmt.Sprint(bitArrayToInt(thisArray) + 1))
+	}
 
 	return restrictedDigitToken.String()
 }
@@ -116,16 +118,27 @@ func convertFrom4DigitsToken(digits string) uint64 {
 		bits = append(bits, tmp...)
 	}
 
-	return bitArrayToInt(bits)
+	return uint64(bitArrayToInt(bits))
 }
 
 func getBitArrayFromInt(source uint64, nbOfBits int) []byte {
+
 	bitsArray := make([]byte, nbOfBits)
-	binary.BigEndian.PutUint64(bitsArray, source)
+	for i := 0; i < nbOfBits; i++ {
+		if (source & (1 << (nbOfBits - 1 - i))) != 0 {
+			bitsArray[i] = 1
+		} else {
+			bitsArray[i] = 0
+		}
+	}
 
 	return bitsArray
 }
 
-func bitArrayToInt(bits []byte) uint64 {
-	return binary.BigEndian.Uint64(bits)
+func bitArrayToInt(bits []byte) int {
+	num := 0
+	for _, bit := range bits {
+		num = (num << 1) | int(bit)
+	}
+	return num
 }

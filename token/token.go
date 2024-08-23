@@ -98,7 +98,7 @@ func generateStandardToken(tokenContext TokenContext) (FinalToken, error) {
 
 	var token FinalToken
 	if tokenContext.RestrictDigitSet {
-		token.Token = shared.ConvertTo4DigitsToken(finalToken)
+		token.Token = shared.ConvertTo4DigitsToken(finalToken, 15)
 		token.Token = strings.TrimLeft(fmt.Sprintf("%015s", token.Token), " ")
 	} else {
 		token.Token = strconv.FormatInt(int64(finalToken), 10)
